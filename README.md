@@ -6,6 +6,7 @@
 
 ## USE
 
+
 	package main
 
 	import (
@@ -17,23 +18,19 @@
 	func main() {
 		m := pat.New()
 		m.Get("/hello/:name", pat.HandlerFunc(hello))
-		m.Get("/splat/", pat.HandlerFunc(splat))
+		m.Get("/splat/", pat.HandlerFlat(splat))
 		http.ListenAndServe("localhost:5000", m)
 	}
 
-	func hello(params pat.Params, _ string) http.HandlerFunc {
-		return func(w http.ResponseWriter, r *http.Request) {
-			// Path variable names are in the URL.Query() and start with ':'.
+	func hello(params pat.Params, _ string) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			name := params[":name"]
 			io.WriteString(w, "Hello, "+name)
-		}
+		})
 	}
 
-	func splat(_ pat.Params, s string) http.HandlerFunc {
-		return func(w http.ResponseWriter, r *http.Request) {
-			// Path variable names are in the URL.Query() and start with ':'.
-			io.WriteString(w, "Splat: "+s)
-		}
+	func splat(_ pat.Params, s string, w http.ResponseWriter, r *http.Request) {
+		io.WriteString(w, "Splat: "+s)
 	}
 
 It's that simple.
