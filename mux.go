@@ -6,20 +6,20 @@ import (
 )
 
 type Handler interface {
-	Handle(params Params, splat string) http.HandlerFunc
+	Handle(params Params, splat string) http.Handler
 }
-type HandlerFunc func(params Params, splat string) http.HandlerFunc
+type HandlerFunc func(params Params, splat string) http.Handler
 
-func (h HandlerFunc) Handle(params Params, splat string) http.HandlerFunc {
+func (h HandlerFunc) Handle(params Params, splat string) http.Handler {
 	return h(params, splat)
 }
 
 type HandlerFlat func(Params, string, http.ResponseWriter, *http.Request)
 
-func (h HandlerFlat) Handle(params Params, splat string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func (h HandlerFlat) Handle(params Params, splat string) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		h(params, splat, w, r)
-	}
+	})
 }
 
 type Params map[string]string

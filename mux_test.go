@@ -63,7 +63,7 @@ func TestPatRoutingHit(t *testing.T) {
 	p := New()
 
 	var ok bool
-	p.Get("/foo/:name", HandlerFunc(func(p Params, _ string) http.HandlerFunc {
+	p.Get("/foo/:name", HandlerFunc(func(p Params, _ string) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ok = true
 			t.Logf("%#v", r.URL.Query())
