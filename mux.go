@@ -8,9 +8,18 @@ import (
 type Handler interface {
 	Handle(params Params, splat string) http.HandlerFunc
 }
-type HandlerFunc func (params Params, splat string) http.HandlerFunc
+type HandlerFunc func(params Params, splat string) http.HandlerFunc
+
 func (h HandlerFunc) Handle(params Params, splat string) http.HandlerFunc {
 	return h(params, splat)
+}
+
+type HandlerFlat func(Params, string, http.ResponseWriter, *http.Request)
+
+func (h HandlerFlat) Handle(params Params, splat string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		h(params, splat, w, r)
+	}
 }
 
 type Params map[string]string
@@ -76,7 +85,7 @@ func (ph *patHandler) try(path string) (Params, string, bool) {
 			// Should i put a special form variable splat for this case
 			return p, path[i:], true
 		case j >= len(ph.pat):
-			return nil, "",false
+			return nil, "", false
 		case ph.pat[j] == ':':
 			var name, val string
 			name, j = find(ph.pat, '/', j)

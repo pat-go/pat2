@@ -85,10 +85,8 @@ func TestPatRoutingNoHit(t *testing.T) {
 	p := New()
 
 	var ok bool
-	p.Post("/foo/:name", HandlerFunc(func(p Params, _ string) http.HandlerFunc {
-		return func(w http.ResponseWriter, r *http.Request) {
-			ok = true
-		}
+	p.Post("/foo/:name", HandlerFlat(func(p Params, splat string, w http.ResponseWriter, r *http.Request) {
+		ok = true
 	}))
 
 	r, err := http.NewRequest("GET", "/foo/keith", nil)
