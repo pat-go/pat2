@@ -8,53 +8,62 @@ import (
 )
 
 func TestPatMatch(t *testing.T) {
-	params, ok := (&patHandler{"/foo/:name", nil}).try("/foo/bar")
+	params, splat, ok := (&patHandler{"/foo/:name", nil}).try("/foo/bar")
 	assert.Equal(t, true, ok)
 	assert.Equal(t, Params{":name": "bar"}, params)
+	assert.Equal(t, splat, "")
 
-	params, ok = (&patHandler{"/foo/:name/baz", nil}).try("/foo/bar")
+	params, splat, ok = (&patHandler{"/foo/:name/baz", nil}).try("/foo/bar")
 	assert.Equal(t, false, ok)
+	assert.Equal(t, splat, "")
 
-	params, ok = (&patHandler{"/foo/:name/baz", nil}).try("/foo/bar/baz")
+	params, splat, ok = (&patHandler{"/foo/:name/baz", nil}).try("/foo/bar/baz")
 	assert.Equal(t, true, ok)
 	assert.Equal(t, Params{":name": "bar"}, params)
+	assert.Equal(t, splat, "")
 
-	params, ok = (&patHandler{"/foo/:name/baz/:id", nil}).try("/foo/bar/baz")
+	params, splat, ok = (&patHandler{"/foo/:name/baz/:id", nil}).try("/foo/bar/baz")
 	assert.Equal(t, false, ok)
+	assert.Equal(t, splat, "")
 
-	params, ok = (&patHandler{"/foo/:name/baz/:id", nil}).try("/foo/bar/baz/123")
+	params, splat, ok = (&patHandler{"/foo/:name/baz/:id", nil}).try("/foo/bar/baz/123")
 	assert.Equal(t, true, ok)
 	assert.Equal(t, Params{":name": "bar", ":id": "123"}, params)
+	assert.Equal(t, splat, "")
 
-	params, ok = (&patHandler{"/foo/:name/baz/:name", nil}).try("/foo/bar/baz/123")
+	params, splat, ok = (&patHandler{"/foo/:name/baz/:name", nil}).try("/foo/bar/baz/123")
 	assert.Equal(t, true, ok)
 	assert.Equal(t, Params{":name": "123"}, params)
+	assert.Equal(t, splat, "")
 
-	params, ok = (&patHandler{"/foo/::name", nil}).try("/foo/bar")
+	params, splat, ok = (&patHandler{"/foo/::name", nil}).try("/foo/bar")
 	assert.Equal(t, true, ok)
 	assert.Equal(t, Params{"::name": "bar"}, params)
+	assert.Equal(t, splat, "")
 
-	params, ok = (&patHandler{"/foo/x:name", nil}).try("/foo/bar")
+	params, splat, ok = (&patHandler{"/foo/x:name", nil}).try("/foo/bar")
 	assert.Equal(t, false, ok)
+	assert.Equal(t, splat, "")
 
-	params, ok = (&patHandler{"/foo/x:name", nil}).try("/foo/xbar")
+	params, splat, ok = (&patHandler{"/foo/x:name", nil}).try("/foo/xbar")
 	assert.Equal(t, true, ok)
 	assert.Equal(t, Params{":name": "bar"}, params)
+	assert.Equal(t, splat, "")
 
-	params, ok = (&patHandler{"/foo/", nil}).try("/foo/bar/baz")
+	params, splat, ok = (&patHandler{"/foo/", nil}).try("/foo/bar/baz")
 	assert.Equal(t, true, ok)
-	assert.Equal(t, Params{":splat": "bar/baz"}, params)
+	assert.Equal(t, splat, "bar/baz")
 
-	params, ok = (&patHandler{"/foo/", nil}).try("/foo/bar")
+	params, splat, ok = (&patHandler{"/foo/", nil}).try("/foo/bar")
 	assert.Equal(t, true, ok)
-	assert.Equal(t, Params{":splat": "bar"}, params)
+	assert.Equal(t, splat, "bar")
 }
 
 func TestPatRoutingHit(t *testing.T) {
 	p := New()
 
 	var ok bool
-	p.Get("/foo/:name", Handler(func(p Params) http.Handler {
+	p.Get("/foo/:name", HandlerFunc(func(p Params, _ string) http.HandlerFunc {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ok = true
 			t.Logf("%#v", r.URL.Query())
@@ -76,10 +85,10 @@ func TestPatRoutingNoHit(t *testing.T) {
 	p := New()
 
 	var ok bool
-	p.Post("/foo/:name", Handler(func(p Params) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	p.Post("/foo/:name", HandlerFunc(func(p Params, _ string) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
 			ok = true
-		})
+		}
 	}))
 
 	r, err := http.NewRequest("GET", "/foo/keith", nil)
