@@ -9,7 +9,7 @@
 	package main
 
 	import (
-		"github.com/georgerogers42/pat2"
+		"github.com/pat-go/pat2"
 		"io"
 		"net/http"
 	)
@@ -42,13 +42,13 @@ It's that simple.
 
 * Keith Rarick (@krarick) - github.com/kr
 * Blake Mizerany (@bmizerany) - github.com/bmizerany
-* Evan Shaw
 * George Rogers - github.com/georgerogers42
+* Evan Shaw
 * Matt Nunogawa (@amattn) - github.com/amattn
 
 ## LICENSE
 
-Copyright (C) 2012 by Keith Rarick, Blake Mizerany
+Copyright (C) 2012 by Keith Rarick, Blake Mizerany, George Rogers
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
